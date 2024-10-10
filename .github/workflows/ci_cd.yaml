@@ -49,40 +49,5 @@ jobs:
       - name: Push Docker Image
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/devexercise
 
-      - name: Create Kubernetes Manifests
-        run: |
-          echo "
-          apiVersion: apps/v1
-          kind: Deployment
-          metadata:
-            name: devexercise
-          spec:
-            replicas: 1
-            selector:
-              matchLabels:
-                app: devexercise
-            template:
-              metadata:
-                labels:
-                  app: devexercise
-              spec:
-                containers:
-                - name: devexercise
-                  image: ${{ secrets.DOCKERHUB_USERNAME }}/devexercise:latest
-                  ports:
-                  - containerPort: 8000
-          ---
-          apiVersion: v1
-          kind: Service
-          metadata:
-            name: devexercise
-          spec:
-            selector:
-              app: devexercise
-            ports:
-              - protocol: TCP
-                port: 80
-                targetPort: 8000
-          " > deployment.yaml
 
 
