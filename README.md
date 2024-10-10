@@ -8,7 +8,7 @@ This README provides instructions on how to clone and run the DevExercise applic
 To get started, clone the repository using the following command:
 
 ```bash
-git clone https://github.com/mpsoaresdev/devexercise.git
+git clone https://github.com/mpsoares/devexercise.git
 ```
 
 ## Prerequisites
