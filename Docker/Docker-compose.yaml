@@ -18,7 +18,7 @@ services:
     environment:
       - MONGODB_URI=mongodb://mongodb:27017
     ports:
-      - "8080:8080" 
+      - "8000:8000" 
     restart: always
 
 volumes:
