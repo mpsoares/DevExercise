@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: always
+
+  app:
+    image: docker.io/mpsoares/devexercise:latest
+    container_name: devexercise_app
+    depends_on:
+      - mongodb
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017
+    ports:
+      - "8080:8080" 
+    restart: always
+
+volumes:
+  mongodb_data:
