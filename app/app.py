@@ -22,12 +22,13 @@ class RequestHandler(BaseHTTPRequestHandler):
             post_data = self.rfile.read(content_length)
             product_info = json.loads(post_data)
 
-            # Generate UUID for product
             product_id = str(uuid4())
 
             # Create Product Document
             categories = []
-            for cat_name in product_info.get('categories', []):
+            for cat_obj in product_info.get('categories', []):
+                cat_name = cat_obj.get('name') if isinstance(cat_obj, dict) else cat_obj
+
                 # Check if category already exists in the category collection
                 existing_category = category_collection.find_one({"name": cat_name})
 
@@ -42,23 +43,26 @@ class RequestHandler(BaseHTTPRequestHandler):
                     category_id = str(uuid4())
                     new_category = {
                         "id": category_id,
-                        "name": cat_name
+                        "name": cat_name 
                     }
+
                     category_collection.insert_one(new_category)
-                    categories.append(new_category)
+                    categories.append({
+                        "id": category_id,
+                        "name": cat_name 
+                    })
 
             # Create the product object
             product = {
                 "id": product_id,
-                "stock": 0,  # Default stock
+                "stock": 0, 
                 "description": product_info.get('description', ''),
-                "categories": categories,
+                "categories": categories, 
                 "price": float(product_info.get('price', '0'))
             }
 
             # Insert product into MongoDB
             product_collection.insert_one(product)
-
 
             # Respond
             self._set_headers()
@@ -80,9 +84,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             product = product_collection.find_one({"id": product_id})
 
             if product:
-                product['_id'] = str(product['_id'])  # Convert ObjectId to string
+                product['_id'] = str(product['_id']) 
 
-                # Ensure categories return both id and name
                 product['categories'] = [{"id": cat['id'], "name": cat['name']} for cat in product['categories']]
 
                 self._set_headers()
