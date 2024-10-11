@@ -18,7 +18,7 @@ Before running the application, ensure you have the following prerequisites inst
 - Docker
 - Docker Compose
 - Kubernetes
-- Helm
+
 
 ## Running the Application
 
