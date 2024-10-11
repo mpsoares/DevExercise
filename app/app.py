@@ -7,7 +7,8 @@ from pymongo import MongoClient
 # MongoDB Client Setup
 client = MongoClient(os.environ.get('MONGODB_URI', 'mongodb://localhost:27017/'))
 db = client['product_db']
-collection = db['products']
+product_collection = db['products']
+category_collection = db['categories'] 
 
 class RequestHandler(BaseHTTPRequestHandler):
     def _set_headers(self, status=200):
@@ -21,13 +22,32 @@ class RequestHandler(BaseHTTPRequestHandler):
             post_data = self.rfile.read(content_length)
             product_info = json.loads(post_data)
 
-            # Generate UUIDs
+            # Generate UUID for product
             product_id = str(uuid4())
-            categories = [
-                str(uuid4()) for _ in product_info.get('categories', [])
-            ]
 
             # Create Product Document
+            categories = []
+            for cat_name in product_info.get('categories', []):
+                # Check if category already exists in the category collection
+                existing_category = category_collection.find_one({"name": cat_name})
+
+                if existing_category:
+                    # Use the existing category
+                    categories.append({
+                        "id": existing_category['id'],
+                        "name": existing_category['name']
+                    })
+                else:
+                    # Create a new category
+                    category_id = str(uuid4())
+                    new_category = {
+                        "id": category_id,
+                        "name": cat_name
+                    }
+                    category_collection.insert_one(new_category)
+                    categories.append(new_category)
+
+            # Create the product object
             product = {
                 "id": product_id,
                 "stock": 0,  # Default stock
@@ -36,8 +56,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 "price": float(product_info.get('price', '0'))
             }
 
-            # Insert into MongoDB
-            collection.insert_one(product)
+            # Insert product into MongoDB
+            product_collection.insert_one(product)
+
 
             # Respond
             self._set_headers()
@@ -55,11 +76,15 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({"error": "Product ID is required"}).encode())
                 return
 
-            # Fetch from MongoDB
-            product = collection.find_one({"id": product_id})
+            # Fetch product from MongoDB
+            product = product_collection.find_one({"id": product_id})
 
             if product:
                 product['_id'] = str(product['_id'])  # Convert ObjectId to string
+
+                # Ensure categories return both id and name
+                product['categories'] = [{"id": cat['id'], "name": cat['name']} for cat in product['categories']]
+
                 self._set_headers()
                 self.wfile.write(json.dumps(product, default=str).encode())
             else:
