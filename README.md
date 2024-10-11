@@ -41,7 +41,7 @@ curl -X POST -H "Content-Type: application/json" -d '{"description": "Product De
 Copy the product id from the response and use it to retrieve the product details with the following curl command:
 
 ```bash
-curl http://localhost:8000/product/$product_id
+curl http://localhost:8000/get_product?id=$product_id
 ```
 
 
@@ -65,7 +65,7 @@ curl -X POST -H "Content-Type: application/json" -d '{"description": "Product De
 Copy the product id from the response and use it to retrieve the product details with the following curl command:
 
 ```bash
-curl http://localhost:8000/product/$product_id
+curl http://localhost:8000/get_product?id=$product_id
 ```
 
 ### A few Improvements to do if this was a real application:
